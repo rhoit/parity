@@ -1,0 +1,4 @@
+#+TITLE: parity
+#+DATE: Thursday, Jul 21 2016
+
+Bash implementation of parity-puzzle.
