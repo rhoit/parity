@@ -111,7 +111,7 @@ function figlet_wrap {
 function check_endgame { # $1: end game
     let "$1" && {
         tput cup $offset_figlet_y 0; figlet_wrap -c -w $COLUMNS $status
-        box_board_terminate
+        board_terminate
         exit
     }
 
@@ -124,7 +124,6 @@ function check_endgame { # $1: end game
 }
 
 function status {
-    tput cup 1 0;
 	printf "level: %-9s" "$level/150"
 	printf "score: %-9d" "$score"
 	printf "moves: %-9d" "$moves"
@@ -132,18 +131,32 @@ function status {
 }
 
 
-function play_level { # $1: board
+function play_level { # $1:cursor_x $2:cursor:y $* board
+    ## get-game-specs
+    cursor2_x=$1; shift
+    cursor2_y=$1; shift
     declare board=( $@ )
 
+    ## create board
+    board_vt100_colors=$vt100_normal
     status # TODO FIX status print
-    box_board_print $BOARD_SIZE
-    box_board_update
+    board_print $BOARD_SIZE
+    board_update
 
-    ## game-initials
-    index1=0 cursor1_x=0 cursor1_y=0
-    index2=0 cursor2_x=0 cursor2_y=0
-    let board[index0]--
-    level=1
+    test -z $NOPLAY || {
+        echo
+        echo "PRESS ENTER TO SEE NEXT LEVEL"
+        board_vt100_colors=$vt100_select
+        let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
+        board_tile_update_ij $cursor2_y $cursor2_x ${board[$index2]}
+        read
+        return 1
+    }
+
+    ## set-loop variables
+    let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
+    let board[$index2]--
+    cursor1_x=0 cursor1_y=0
     change=1
 
     ## game-loop
@@ -151,15 +164,15 @@ function play_level { # $1: board
         let change && {
             board_vt100_colors=$vt100_normal
             let index1=$((cursor1_y*BOARD_SIZE+cursor1_x))
-            block_update_ij $cursor1_y $cursor1_x ${board[$index1]}
+            board_tile_update_ij $cursor1_y $cursor1_x ${board[$index1]}
 
             let moves++
-            status
+            tput cup 1 0; status
 
             board_vt100_colors=$vt100_select
             let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
             let board[index2]++
-            block_update_ij $cursor2_y $cursor2_x ${board[$index2]}
+            board_tile_update_ij $cursor2_y $cursor2_x ${board[$index2]}
 
             cursor1_x=$cursor2_x
             cursor1_y=$cursor2_y
@@ -174,10 +187,16 @@ declare score=0
 
 trap "check_endgame 1; exit" INT #handle INT signal
 let N="BOARD_SIZE * BOARD_SIZE"
-echo -e $header
-box_board_init $BOARD_SIZE
+board_init $BOARD_SIZE
 board_vt100_normal=$vt100_normal
 
-declare moves=0
-clear # remove after status logic fix
-play_level 1 0 0 1 1 0 1 1 0
+for ((level=LEVEL; level<150; level++)); do
+    clear # remove after status logic fix
+    specs=$(sed -n "${level}p" $WD/levels)
+    test -z "$specs" && exit
+    unset board_old
+    declare moves=0
+    >&3 echo level:$level "($specs)"
+    echo -e $header
+    play_level ${specs[@]}
+done
