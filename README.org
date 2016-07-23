@@ -1,4 +1,17 @@
 #+TITLE: parity
 #+DATE: Thursday, Jul 21 2016
+#+DESCRIPTION: Make all tiles equal.
 
-Bash implementation of parity-puzzle.
+Make all tiles equal
+
+Bash implementation of [[http://karuwaapps.com/parity][parity]].
+
+* How To Play
+
+  The aim of the game is to get all tiles of the board to be equal.
+
+  Game stats with one selected tile. you can change the tiles using
+  the arrow keys.
+
+  Everytime you move the selector, new selected tile value will
+  increase by one.
