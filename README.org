@@ -4,7 +4,9 @@
 
 Make all tiles equal
 
-Bash implementation of [[http://karuwaapps.com/parity][parity]].
+[[https://raw.githubusercontent.com/rhoit/parity/dump/screenshot00.png]]
+
+Bash implementation of [[http://www.abefehr.com/parity/][parity]]
 
 * How To Play
 
@@ -15,3 +17,7 @@ Bash implementation of [[http://karuwaapps.com/parity][parity]].
 
   Everytime you move the selector, new selected tile value will
   increase by one.
+
+* other implementation
+
+  - http://karuwaapps.com/parity
