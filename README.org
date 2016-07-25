@@ -1,30 +1,47 @@
-#+TITLE: parity
+#+TITLE: parity-puzzle
 #+DATE: Thursday, Jul 21 2016
 #+DESCRIPTION: Make all tiles equal.
+#+STARTUP: showall
 
 Make all tiles equal
 
 [[https://raw.githubusercontent.com/rhoit/parity/dump/screenshot00.png]]
 
-Bash implementation of [[http://www.abefehr.com/parity/][parity]]
+Bash implementation of [[http://www.abefehr.com/parity/][parity]] puzzle.
 
 * How To Play
 
-  The aim of the game is to get all tiles of the board to be equal.
+  The aim of the game is to make all tiles values equal.
 
-  Game stats with one selected tile. you can change the tiles using
-  the arrow keys.
+** Basic
 
-  Everytime you move the selector, new selected tile value will
-  increase by one.
+   Game stats with one of the tile is selected, which can be moved
+   around the board using arrow keys. Everytime you move the selector,
+   next selected tile value will increase by one.
 
-* Black & White
+** Black & White
 
-  The board contains black and white, tiles,
-  each of which has different behaviour.
+   Now, the board contains black and white tiles, white tiles dose the
+   increment and black drecrement the tile value.
 
-  Stepping on white tiles increase the numbers by one
-  Stepping on black tiles decrease the number by one
+* Installation
+
+** Manual
+
+   Download the latest verion from [[https://github.com/rhoit/parity/archive/master.zip][zip]] or [[https://github.com/rhoit/parity/archive/master.tar.gz][tar]] clone the repo.
+
+   | Requirement | Type     |
+   |-------------+----------|
+   | bash        | depends  |
+   | sed         | depends  |
+   | [[https://github.com/bekar/ASCII-board][ASCII-board]] | depends  |
+   | figlet      | optional |
+
+    #+begin_src bash
+      $ cd path-to-parity
+      $ ./configure
+      $ sudo make install
+    #+end_src
 
 * Other implementation
 

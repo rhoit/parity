@@ -1,18 +1,17 @@
 #!/usr/bin/bash
 
-__PKG_NAME__="parity"
+__PKG_NAME__="parity-puzzle"
+__VERSION__="1.0"
 
 function Usage {
     echo -e "Usage: $__PKG_NAME__ [OPTIONS] [LEVEL]";
-    echo -e "\t-b | --board\tboard size"
-    echo -e "\t-l | --level\tjump to game level"
     echo -e "\t-d | --debug\tdebug file"
     echo -e "\t-h | --help\tDisplay this message"
     echo -e "\t-v | --version\tversion information"
 }
 
-TEMP=$(getopt -o b:l:dhv\
-              -l board:,level:,debug,help,version\
+TEMP=$(getopt -o d:hv\
+              -l debug:,help,version\
               -n "$__PKG_NAME__"\
               -- "$@")
 
@@ -25,11 +24,9 @@ LEVEL=1
 exec 3>/tmp/parity
 while true; do
     case $1 in
-        -b|--board)   BOARD_SIZE=$2; shift 2;;
-        -l|--level)   LEVEL=$2; shift 2;;
         -d|--debug)   exec 3>$2; shift 2;;
         -h|--help)    Usage; exit;;
-        -v|--version) cat $WD/version; exit;;
+        -v|--version) echo $__VERSION__; exit;;
         --)           shift; break
     esac
 done

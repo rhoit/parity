@@ -1,0 +1,8 @@
+*.json
+*.py
+*.pyc
+*.tar.xz
+.version
+parity/
+pkg/
+src/
