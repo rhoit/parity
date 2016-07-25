@@ -20,12 +20,14 @@ eval set -- "$TEMP"
 
 BOARD_SIZE=3
 LEVEL=1
-exec 3>/tmp/parity
+export WD="$(dirname $(readlink $0 || echo $0))"
+exec 3>/dev/null
+
 while true; do
     case $1 in
         -d|--debug)   exec 3>$2; shift 2;;
         -h|--help)    Usage; exit;;
-        -v|--version) cat .version; exit;;
+        -v|--version) cat $WD/.version; exit;;
         --)           shift; break
     esac
 done
@@ -41,7 +43,6 @@ done
 
 header="$__PKG_NAME__ (https://github.com/rhoit/parity)"
 
-export WD="$(dirname $(readlink $0 || echo $0))"
 export WD_BOARD=$WD/ASCII-board
 source $WD_BOARD/board.sh
 declare ESC=$'\e' # escape byte
