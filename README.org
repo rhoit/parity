@@ -18,6 +18,14 @@ Bash implementation of [[http://www.abefehr.com/parity/][parity]]
   Everytime you move the selector, new selected tile value will
   increase by one.
 
-* other implementation
+* Black & White
+
+  The board contains black and white, tiles,
+  each of which has different behaviour.
+
+  Stepping on white tiles increase the numbers by one
+  Stepping on black tiles decrease the number by one
+
+* Other implementation
 
   - http://karuwaapps.com/parity

@@ -48,11 +48,7 @@ header="$__PKG_NAME__ (https://github.com/rhoit/parity)"
 export WD="$(dirname $(readlink $0 || echo $0))"
 export WD_BOARD=$WD/ASCII-board
 source $WD_BOARD/board.sh
-
 declare ESC=$'\e' # escape byte
-declare vt100_normal="\e[m"
-declare vt100_select="\e[1;33;48;5;24m"
-
 
 function cursor_move { # $1: direction
     local direction=$1
@@ -135,10 +131,20 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
     ## get-game-specs
     cursor2_x=$1; shift
     cursor2_y=$1; shift
-    declare board=( $@ )
+
+    local index=0
+    for arg in $@; do # getting the tile colors
+        local num=${arg/[a-z]/}
+        declare board[$index]=$num
+        case ${arg/$num/} in
+            b) declare colors[$index]="\e[1m" diff[$index]=-1;;
+            w) declare colors[$index]="\e[1;30;47m" diff[$index]=1;;
+            *) declare diff[$index]=1;;
+        esac
+        let index++
+    done
 
     ## create board
-    board_vt100_colors=$vt100_normal
     status # TODO FIX status print
     board_print $BOARD_SIZE
     board_update
@@ -146,9 +152,8 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
     test -z $NOPLAY || {
         echo
         echo "PRESS ENTER TO SEE NEXT LEVEL"
-        board_vt100_colors=$vt100_select
-        let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
-        board_tile_update_ij $cursor2_y $cursor2_x ${board[$index2]}
+        board_vt100_tile=${colors[index2]}
+        board_select_tile_ij $cursor2_y $cursor2_x
         read
         return 1
     }
@@ -162,16 +167,15 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
     ## game-loop
     while true; do
         let change && {
-            board_vt100_colors=$vt100_normal
-            let index1=$((cursor1_y*BOARD_SIZE+cursor1_x))
-            board_tile_update_ij $cursor1_y $cursor1_x ${board[$index1]}
+            board_select_tile_ij $cursor1_y $cursor1_x True
 
             let moves++
             tput cup 1 0; status
 
-            board_vt100_colors=$vt100_select
             let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
-            let board[index2]++
+            let board[index2]+=diff[index2]
+            board_vt100_tile=${colors[index2]}
+            board_select_tile_ij $cursor2_y $cursor2_x
             board_tile_update_ij $cursor2_y $cursor2_x ${board[$index2]}
 
             cursor1_x=$cursor2_x
@@ -188,7 +192,6 @@ declare score=0
 trap "check_endgame 1; exit" INT #handle INT signal
 let N="BOARD_SIZE * BOARD_SIZE"
 board_init $BOARD_SIZE
-board_vt100_normal=$vt100_normal
 
 for ((level=LEVEL; level<150; level++)); do
     clear # remove after status logic fix
