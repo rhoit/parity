@@ -1,7 +1,6 @@
 #!/usr/bin/bash
 
 __PKG_NAME__="parity-puzzle"
-__VERSION__="1.0"
 
 function Usage {
     echo -e "Usage: $__PKG_NAME__ [OPTIONS] [LEVEL]";
@@ -26,7 +25,7 @@ while true; do
     case $1 in
         -d|--debug)   exec 3>$2; shift 2;;
         -h|--help)    Usage; exit;;
-        -v|--version) echo $__VERSION__; exit;;
+        -v|--version) cat .version; exit;;
         --)           shift; break
     esac
 done
