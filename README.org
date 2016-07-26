@@ -15,9 +15,8 @@ Bash implementation of [[http://www.abefehr.com/parity/][parity]] puzzle.
 
 ** Basic
 
-   Game stats with one of the tile is selected, which can be moved
-   around the board using arrow keys. Everytime you move the selector,
-   next selected tile value will increase by one.
+   Game stats with one of the tile is selected. Everytime the selector
+   moves to new tile its value increases by one.
 
 ** Black & White
 
@@ -47,6 +46,14 @@ Bash implementation of [[http://www.abefehr.com/parity/][parity]] puzzle.
       $ ./configure
       $ sudo make install
     #+end_src
+
+* Playing
+
+  #+BEGIN_SRC language
+    $ parity-puzzle
+  #+END_SRC
+
+  use arrow keys to navigate.
 
 * Other implementation
 
