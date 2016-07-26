@@ -15,7 +15,6 @@ view-levels:
 check-bw:
 	gnome-terminal -e "./main.sh 51" --working-directory=${shell pwd}
 
-
 unlink:
 	rm -f ${DESTDIR}/usr/local/bin/${PKG_NAME}
 
@@ -23,7 +22,7 @@ uninstall: unlink
 	rm -rf ${DESTDIR}/opt/${PKG_NAME}
 
 link: unlink
-	ln -s "$(PWD)/main.sh" ${DESTDIR}/usr/local/bin/2048
+	ln -s "${PWD}/main.sh" ${DESTDIR}/usr/local/bin/${PKG_NAME}
 
 install: unlink uninstall
 	mkdir -p ${DESTDIR}/opt/${PKG_NAME}
