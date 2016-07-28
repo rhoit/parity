@@ -9,14 +9,14 @@ function Usage {
     echo -e "\t-v | --version\tversion information"
 }
 
-TEMP=$(getopt -o d:hv\
+GETOPT=$(getopt -o d:hv\
               -l debug:,help,version\
               -n "$__PKG_NAME__"\
               -- "$@")
 
 if [ $? != "0" ]; then exit 1; fi
 
-eval set -- "$TEMP"
+eval set -- "$GETOPT"
 
 BOARD_SIZE=3
 LEVEL=1
@@ -32,6 +32,8 @@ while true; do
     esac
 done
 
+exec 2>&3 # redirecting errors
+
 # extra argument
 for arg do
     LEVEL=$arg
@@ -41,7 +43,7 @@ done
 #----------------------------------------------------------------------
 # game LOGIC
 
-header="$__PKG_NAME__ (https://github.com/rhoit/parity)"
+header="\e[1m$__PKG_NAME__\e[m (https://github.com/rhoit/parity)"
 
 export WD_BOARD=$WD/ASCII-board
 source $WD_BOARD/board.sh
@@ -91,12 +93,14 @@ function key_react {
 
 function figlet_wrap {
     > /dev/null which figlet && {
-        /usr/bin/figlet $@
+        let offset_figlet_y="_max_y - board_size * _tile_height + 3"
+        tput cup $offset_figlet_y 0;
+        /usr/bin/figlet -c -w $COLUMNS "$*"
+        tput cup $_max_y 0;
         return
     }
 
-    shift 3
-    echo $*
+    echo $@
     echo "install 'figlet' to display large characters."
 }
 
@@ -104,15 +108,15 @@ function figlet_wrap {
 function check_endgame { # $1: end game
     let "$1" && {
         tput cup $offset_figlet_y 0; figlet_wrap -c -w $COLUMNS $status
-        board_terminate
         exit
     }
 
     for ((i=N-1; i > 0; i--)); do
-        [ "${board[0]}" != "${board[$i]}" ] && return
+        [[ "${board[0]}" != "${board[$i]}" ]] && return
     done
 
     tput cup 9 0; figlet -c -w $COLUMNS "COMPLETED"
+    tput cup $board_max_y $COLUMNS
     return 1
 }
 
@@ -167,7 +171,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
             board_select_tile_ij $cursor1_y $cursor1_x True
 
             let moves++
-            tput cup 1 0; status
+            board_tput_status; status
 
             let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
             let board[index2]+=diff[index2]
@@ -186,12 +190,12 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
 
 declare score=0
 
-trap "check_endgame 1; exit" INT #handle INT signal
+trap "check_endgame 1; exit" INT #handle INTTRUPT
 let N="BOARD_SIZE * BOARD_SIZE"
 board_init $BOARD_SIZE
 
 for ((level=LEVEL; level<150; level++)); do
-    clear # remove after status logic fix
+    clear
     specs=$(sed -n "${level}p" $WD/levels)
     test -z "$specs" && exit
     unset board_old
