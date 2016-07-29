@@ -47,7 +47,6 @@ header="\e[1m$__PKG_NAME__\e[m (https://github.com/rhoit/parity)"
 
 export WD_BOARD=$WD/ASCII-board
 source $WD_BOARD/board.sh
-declare ESC=$'\e' # escape byte
 
 function cursor_move { # $1: direction
     local direction=$1
@@ -76,9 +75,9 @@ function cursor_move { # $1: direction
 
 function key_react {
     read -d '' -sn 1
-    test "$REPLY" = "$ESC" && {
+    test "$REPLY" == $'\e' && {
         read -d '' -sn 1 -t1
-        test "$REPLY" = "[" && {
+        test "$REPLY" == "[" && {
             read -d '' -sn 1 -t1
             case $REPLY in
                 A) cursor_move u;;
@@ -92,22 +91,23 @@ function key_react {
 
 
 function figlet_wrap {
+    let offset_figlet_y="_max_y - board_size * _tile_height + 2"
+    tput cup $offset_figlet_y 0;
+
     > /dev/null which figlet && {
-        let offset_figlet_y="_max_y - board_size * _tile_height + 3"
-        tput cup $offset_figlet_y 0;
-        /usr/bin/figlet -c -w $COLUMNS "$*"
-        tput cup $_max_y 0;
+        /usr/bin/figlet "$@"
         return
     }
 
+    shift 3 # ignore first 3 arg for figlet
     echo $@
     echo "install 'figlet' to display large characters."
-}
+ }
 
 
 function check_endgame { # $1: end game
     let "$1" && {
-        tput cup $offset_figlet_y 0; figlet_wrap -c -w $COLUMNS $status
+        tput cup $offset_figlet_y 0; figlet_wrap -c -w $COLUMNS "GAME OVER"
         exit
     }
 
@@ -115,7 +115,7 @@ function check_endgame { # $1: end game
         [[ "${board[0]}" != "${board[$i]}" ]] && return
     done
 
-    tput cup 9 0; figlet -c -w $COLUMNS "COMPLETED"
+    tput cup 9 0; figlet_wrap -c -w $COLUMNS "COMPLETED"
     tput cup $board_max_y $COLUMNS
     return 1
 }
@@ -146,7 +146,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
     done
 
     ## create board
-    status # TODO FIX status print
+    status
     board_print $BOARD_SIZE
     board_update
 
@@ -160,7 +160,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
     }
 
     ## set-loop variables
-    let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
+    let index2="cursor2_y * BOARD_SIZE + cursor2_x"
     let board[$index2]--
     cursor1_x=0 cursor1_y=0
     change=1
@@ -173,7 +173,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
             let moves++
             board_tput_status; status
 
-            let index2=$((cursor2_y*BOARD_SIZE+cursor2_x))
+            let index2="cursor2_y * BOARD_SIZE + cursor2_x"
             let board[index2]+=diff[index2]
             board_vt100_tile=${colors[index2]}
             board_select_tile_ij $cursor2_y $cursor2_x
@@ -194,7 +194,8 @@ trap "check_endgame 1; exit" INT #handle INTTRUPT
 let N="BOARD_SIZE * BOARD_SIZE"
 board_init $BOARD_SIZE
 
-for ((level=LEVEL; level<150; level++)); do
+LMAX=$(cat $WD/levels | wc -l)
+for ((level=LEVEL; level<=$LMAX; level++)); do
     clear
     specs=$(sed -n "${level}p" $WD/levels)
     test -z "$specs" && exit

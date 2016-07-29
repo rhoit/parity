@@ -1,6 +1,6 @@
 PKG_NAME = parity-puzzle
 SOURCES = main.sh
-SUPPORT = ASCII-board levels README.org AUTHORS LICENCE .version
+SUPPORT = README.org AUTHORS LICENCE .version ASCII-board levels
 
 default:
 	./main.sh
