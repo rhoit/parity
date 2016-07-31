@@ -90,24 +90,9 @@ function key_react {
 }
 
 
-function figlet_wrap {
-    let offset_figlet_y="_max_y - board_size * _tile_height + 2"
-    tput cup $offset_figlet_y 0;
-
-    > /dev/null which figlet && {
-        /usr/bin/figlet "$@"
-        return
-    }
-
-    shift 3 # ignore first 3 arg for figlet
-    echo $@
-    echo "install 'figlet' to display large characters."
- }
-
-
 function check_endgame { # $1: end game
     let "$1" && {
-        tput cup $offset_figlet_y 0; figlet_wrap -c -w $COLUMNS "GAME OVER"
+        board_banner "GAME OVER"
         exit
     }
 
@@ -115,13 +100,13 @@ function check_endgame { # $1: end game
         [[ "${board[0]}" != "${board[$i]}" ]] && return
     done
 
-    tput cup 9 0; figlet_wrap -c -w $COLUMNS "COMPLETED"
-    tput cup $board_max_y $COLUMNS
+    board_banner "COMPLETED"
     return 1
 }
 
+
 function status {
-	printf "level: %-9s" "$level/150"
+	printf "level: %-9s" "$level/$LMAX"
 	printf "score: %-9d" "$score"
 	printf "moves: %-9d" "$moves"
 	echo

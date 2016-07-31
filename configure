@@ -7,5 +7,5 @@ git submodule update
     echo "install 'figlet' to display large characters."
 }
 
-git describe --tags > version
-cat version
+git describe --tags > .version
+cat .version
