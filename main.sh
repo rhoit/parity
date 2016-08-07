@@ -4,23 +4,23 @@ __PKG_NAME__="parity-puzzle"
 
 function Usage {
     echo -e "Usage: $__PKG_NAME__ [OPTIONS] [LEVEL]";
-    echo -e "\t-d | --debug\tdebug file"
+    echo -e "\t-d | --debug [FILE]\tdebug info to file provided"
     echo -e "\t-h | --help\tDisplay this message"
     echo -e "\t-v | --version\tversion information"
 }
 
-GETOPT=$(getopt -o d:hv\
-              -l debug:,help,version\
-              -n "$__PKG_NAME__"\
-              -- "$@")
+GETOPT=$(getopt -o d:hv \
+                -l debug:,help,version \
+                -n "$__PKG_NAME__" \
+                -- "$@")
 
-if [ $? != "0" ]; then exit 1; fi
+[[ $? != "0" ]] && exit 1
 
 eval set -- "$GETOPT"
 
+export WD="$(dirname $(readlink $0 || echo $0))"
 BOARD_SIZE=3
 LEVEL=1
-export WD="$(dirname $(readlink $0 || echo $0))"
 exec 3>/dev/null
 
 while true; do
@@ -47,6 +47,7 @@ header="\e[1m$__PKG_NAME__\e[m (https://github.com/rhoit/parity)"
 
 export WD_BOARD=$WD/ASCII-board
 source $WD_BOARD/board.sh
+
 
 function cursor_move { # $1: direction
     local direction=$1
@@ -90,11 +91,11 @@ function key_react {
 }
 
 
-function check_endgame { # $1: end game
-    let "$1" && {
+function check_endgame { # $1: force end flag
+    if (( "$1" == 0 )); then
         board_banner "GAME OVER"
         exit
-    }
+    fi
 
     for ((i=N-1; i > 0; i--)); do
         [[ "${board[0]}" != "${board[$i]}" ]] && return
@@ -154,8 +155,6 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
     while true; do
         let change && {
             board_select_tile_ij $cursor1_y $cursor1_x True
-
-            let moves++
             board_tput_status; status
 
             let index2="cursor2_y * BOARD_SIZE + cursor2_x"
@@ -166,6 +165,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
 
             cursor1_x=$cursor2_x
             cursor1_y=$cursor2_y
+            let moves++
             change=0
         } #<&-
         check_endgame || return
@@ -175,7 +175,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
 
 declare score=0
 
-trap "check_endgame 1; exit" INT #handle INTTRUPT
+trap "check_endgame 0; exit" INT #handle INTERRUPT
 let N="BOARD_SIZE * BOARD_SIZE"
 board_init $BOARD_SIZE
 
