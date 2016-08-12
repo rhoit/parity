@@ -45,7 +45,7 @@ done
 
 header="\e[1m$__PKG_NAME__\e[m (https://github.com/rhoit/parity)"
 
-export WD_BOARD=$WD/ASCII-board
+export WD_BOARD=${WD_BOARD:-"$WD/ASCII-board"}
 source $WD_BOARD/board.sh
 
 
@@ -170,7 +170,7 @@ function play_level { # $1:cursor_x $2:cursor:y $* board
 
 declare score=0
 trap "board_banner 'GAME OVER'; exit" INT #handle INTERRUPT
-let N="BOARD_SIZE * BOARD_SIZE"
+N=$((BOARD_SIZE*BOARD_SIZE))
 board_init $BOARD_SIZE
 
 LMAX=$(cat $WD/levels | wc -l)
